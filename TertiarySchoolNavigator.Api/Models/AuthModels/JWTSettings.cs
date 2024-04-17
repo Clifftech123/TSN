@@ -2,8 +2,8 @@
 {
     public class JWTSettings
     {
-        public required string Audience { get; set; }
-        public required string ValidIssuer { get; set; }
-        public required string SecretKey { get; set; }
+        public string Audience { get; set; }
+        public string ValidIssuer { get; set; }
+        public string SecretKey { get; set; }
     }
 }

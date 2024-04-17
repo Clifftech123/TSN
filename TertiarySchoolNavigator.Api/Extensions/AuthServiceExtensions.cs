@@ -71,4 +71,4 @@ namespace TertiarySchoolNavigator.Api.Extensions
             });
     }
 }
-
+}
