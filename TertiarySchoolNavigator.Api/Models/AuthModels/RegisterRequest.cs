@@ -3,6 +3,8 @@
     public class RegisterRequest
     {
 
+
+       
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Gender { get; set; }

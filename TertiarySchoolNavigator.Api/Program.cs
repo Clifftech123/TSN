@@ -1,4 +1,7 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using TertiarySchoolNavigator.Api.Middleware;
+using TertiarySchoolNavigator.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +14,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-// Adding of Error handle 
+// Add FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+
+
+
+
+// Adding of Execeptions  handle 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
