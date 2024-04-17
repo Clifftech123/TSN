@@ -6,6 +6,7 @@ using System.Text;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.AuthModels;
 
+
 namespace TertiarySchoolNavigator.Api.Service
 {
     public class AuthenticationService : IAuthenticationManager
@@ -28,7 +29,7 @@ namespace TertiarySchoolNavigator.Api.Service
 
         public async Task<bool> AuthenticateUserAsync(LoginRequest loginModel)
         {
-            user = await userManager.FindByNameAsync(loginModel.Username);
+            user = await userManager.FindByNameAsync(loginModel.LoginUserName);
             return (user != null && await userManager.CheckPasswordAsync(user, loginModel.Password));
         }
 
