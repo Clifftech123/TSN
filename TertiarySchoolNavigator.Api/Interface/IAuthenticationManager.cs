@@ -5,7 +5,7 @@ namespace TertiarySchoolNavigator.Api.Interface
 {
     public interface IAuthenticationManager
     {
-        Task<bool> AuthenticateUserAsync(LoginRequest loginRequest);
+        Task<bool> AuthenticateUserAsync(LoginRequset loginRequest);
         Task<string> CreateTokenAsync();
         Task<List<Claim>> GetClaimsAsync();
 

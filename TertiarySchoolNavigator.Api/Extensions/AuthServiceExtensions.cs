@@ -13,9 +13,10 @@ namespace TertiarySchoolNavigator.Api.Extensions
         // Configure the SQL Server connection with the connection string from the appsettings.json file
         public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
             =>
-            services.AddDbContext<AppDbContext>(
-                o => o.UseSqlServer(configuration.GetConnectionString("sqlConnection"),
-                    b => b.MigrationsAssembly("TertialSchoolNavigator")));
+           services.AddDbContext<AppDbContext>(
+    o => o.UseSqlServer(configuration.GetConnectionString("sqlConnection"),
+        b => b.MigrationsAssembly("TertiarySchoolNavigator.Api")));
+    
 
 
         // Configure Identity Framework with the default settings and the custom User and Role classes
@@ -71,4 +72,4 @@ namespace TertiarySchoolNavigator.Api.Extensions
             });
     }
 }
-}
+

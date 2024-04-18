@@ -8,7 +8,8 @@ namespace TertiarySchoolNavigator.Api.Domain
 {
     public class AppDbContext : IdentityDbContext<User, Role, int>
     {
-        public AppDbContext(DbContextOptions options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+      : base(options)
         {
         }
 

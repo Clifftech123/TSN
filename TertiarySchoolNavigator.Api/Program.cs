@@ -1,6 +1,8 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
+using TertiarySchoolNavigator.Api.Extensions;
+using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Middleware;
+using TertiarySchoolNavigator.Api.Service;
 using TertiarySchoolNavigator.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.ConfigureCors();
+builder.Services.ConfigureSqlContext(builder.Configuration);
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.AddScoped<IAuthenticationManager, AuthenticationService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

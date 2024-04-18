@@ -14,7 +14,7 @@ namespace TertiarySchoolNavigator.Api.Service
         // Inject the UserManager and SignInManager services
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
-        private User user;
+        private readonly User? user;
 
 
         public AuthenticationService(UserManager<User> userManager, IConfiguration configuration)
@@ -26,10 +26,10 @@ namespace TertiarySchoolNavigator.Api.Service
 
         // Authenticate the user with the provided credentials
 
-        public async Task<bool> AuthenticateUserAsync(LoginRequest loginModel)
+        public async Task<bool> AuthenticateUserAsync(LoginRequset loginRequest )
         {
-            user = await userManager.FindByNameAsync(loginModel.Username);
-            return (user != null && await userManager.CheckPasswordAsync(user, loginModel.Password));
+          var user = await userManager.FindByEmailAsync(loginRequest.LoginUserName);
+            return (user != null && await userManager.CheckPasswordAsync (user, loginRequest.Password));
         }
 
 
@@ -53,12 +53,15 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
         //  Get claims for the authenticated user
+
         public async Task<List<Claim>> GetClaimsAsync()
         {
-            var claims = new List<Claim>
+            var claims = new List<Claim>();
+
+            if (user != null)
             {
-                new Claim(ClaimTypes.Name, user.UserName)
-            };
+                claims.Add(new Claim(ClaimTypes.Sid,user.Id.ToString()));
+            }
 
             var roles = await userManager.GetRolesAsync(user);
 
@@ -76,11 +79,19 @@ namespace TertiarySchoolNavigator.Api.Service
         private SigningCredentials GetSigningCredentials()
         {
             var jwtSettings = configuration.GetSection("JWTSettings");
-            var key = Encoding.UTF8.GetBytes(jwtSettings.GetSection("secretKey").Value);
+            var secretKey = jwtSettings.GetSection("secretKey").Value;
+
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                throw new ArgumentNullException("secretKey", "The secret key must not be null or empty.");
+            }
+
+            var key = Encoding.UTF8.GetBytes(secretKey);
             var secret = new SymmetricSecurityKey(key);
 
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }
+
 
 
         //
@@ -97,5 +108,6 @@ namespace TertiarySchoolNavigator.Api.Service
             return tokenOptions;
         }
 
+      
     }
 }
