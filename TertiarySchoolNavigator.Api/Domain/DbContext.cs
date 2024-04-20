@@ -6,7 +6,7 @@ using TertiarySchoolNavigator.Api.Models.AuthModels;
 
 namespace TertiarySchoolNavigator.Api.Domain
 {
-    public class AppDbContext : IdentityDbContext<User, Role, int>
+    public class AppDbContext : IdentityDbContext<User, Role, Guid>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
       : base(options)

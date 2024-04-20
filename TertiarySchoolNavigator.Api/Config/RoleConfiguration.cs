@@ -13,13 +13,13 @@ namespace TertiarySchoolNavigator.Api.Config
 
                       new Role
                       {
-                          Id = 2,
+                          Id = Guid.NewGuid(),
                           Name = "Admin",
                           NormalizedName = "ADMIN"
                       },
                       new Role
                       {
-                          Id = 3,
+                          Id = Guid.NewGuid(),
                           Name = " User",
                           NormalizedName = "USER"
                       }
