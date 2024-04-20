@@ -14,7 +14,7 @@ namespace TertiarySchoolNavigator.Api.Service
         // Inject the UserManager and SignInManager services
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
-        private readonly User? user;
+        private User? _user;
 
 
         public AuthenticationService(UserManager<User> userManager, IConfiguration configuration)
@@ -26,11 +26,18 @@ namespace TertiarySchoolNavigator.Api.Service
 
         // Authenticate the user with the provided credentials
 
-        public async Task<bool> AuthenticateUserAsync(LoginRequset loginRequest )
+        public async Task<bool> AuthenticateUserAsync(LoginRequset loginRequest)
         {
-          var user = await userManager.FindByEmailAsync(loginRequest.LoginUserName);
-            return (user != null && await userManager.CheckPasswordAsync (user, loginRequest.Password));
+            _user = await userManager.FindByEmailAsync(loginRequest.username);
+            //if (user == null)
+            //{
+            // Handle the null user case here. For example, you could throw an exception:
+            //  throw new ArgumentException("No user found with the provided email.");
+            // }
+            var result = (_user is not null && await userManager.CheckPasswordAsync(_user, loginRequest.Password));
+            return result;
         }
+
 
 
 
@@ -58,12 +65,12 @@ namespace TertiarySchoolNavigator.Api.Service
         {
             var claims = new List<Claim>();
 
-            if (user != null)
+            if (_user != null)
             {
-                claims.Add(new Claim(ClaimTypes.Sid,user.Id.ToString()));
+                claims.Add(new Claim(ClaimTypes.Sid, _user.Id.ToString()));
             }
 
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await userManager.GetRolesAsync(_user);
 
             foreach (var role in roles)
             {
@@ -108,6 +115,6 @@ namespace TertiarySchoolNavigator.Api.Service
             return tokenOptions;
         }
 
-      
+
     }
 }

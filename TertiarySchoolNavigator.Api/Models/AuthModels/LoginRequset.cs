@@ -3,7 +3,7 @@
     public class LoginRequset
     {
 
-        public string LoginUserName { get; set; }
-        public string Password { get; set; }
+        public required string username { get; set; }
+        public required string Password { get; set; }
     }
 }

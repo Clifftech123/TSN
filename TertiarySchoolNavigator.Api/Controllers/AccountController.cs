@@ -36,10 +36,10 @@ namespace TertiarySchoolNavigator.Api.Controllers
             }
 
             // Find the user
-            var user = await userManager.FindByEmailAsync(loginModel.LoginUserName);
+            var user = await userManager.FindByEmailAsync(loginModel.username);
             if (user == null)
             {
-                return BadRequest(new { Message = $"User with email {loginModel.LoginUserName} does not exist" });
+                return BadRequest(new { Message = $"User with email {loginModel.username} does not exist" });
             }
 
             // Authenticate the user
@@ -56,7 +56,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
         // Register a new user
 
-        [HttpPost("register")]
+        [HttpPost("register-admin")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerModel)
         {
             // Validate the register model
@@ -101,10 +101,60 @@ namespace TertiarySchoolNavigator.Api.Controllers
         }
 
 
+
+
+        // Register a new user  for   user role
+        [HttpPost("register-user")]
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterRequest registerModel)
+        {
+            // Validate the register model
+            var validationResult = registerRequestValidator.Validate(registerModel);
+            if (!validationResult.IsValid)
+            {
+                throw new BadHttpRequestException("Invalid input", StatusCodes.Status400BadRequest);
+            }
+
+            // Check if a user with the same email already exists
+            var existingUser = await userManager.FindByEmailAsync(registerModel.Email);
+            if (existingUser != null)
+            {
+                throw new BadHttpRequestException("User with the same email already exists", StatusCodes.Status400BadRequest);
+            }
+
+            // Create a new user
+            var user = new User
+            {
+                FirstName = registerModel.Firstname,
+                LastName = registerModel.Lastname,
+                Gender = registerModel.Gender,
+                Email = registerModel.Email,
+                UserName = registerModel.Email
+            };
+
+            var result = await userManager.CreateAsync(user, registerModel.Password);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
+
+            // Add the user to the "User" role
+            await userManager.AddToRoleAsync(user, "User");
+
+            return StatusCode(201, new { Message = "User registered successfully", User = user });
+        }
+
+
+
         // Get all user 
 
         [HttpGet("users")]
-
+        [Authorize(Roles = "Administrator")]
         public IActionResult GetUsers()
         {
             var users = userManager.Users.ToList();
@@ -119,7 +169,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
         // Get user by id
 
         [HttpGet("users/{id}")]
-
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
@@ -135,13 +185,22 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         [HttpDelete("users/{id}")]
-
+        [Authorize]
         public async Task<IActionResult> DeleteUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound(new { Message = $"User with id {id} does not exist" });
+            }
+
+            // Get the current user
+            var currentUser = await userManager.GetUserAsync(User);
+
+            // Check if the current user is the same as the user to be deleted or if the current user is an admin
+            if (currentUser.Id != user.Id && !await userManager.IsInRoleAsync(currentUser, "Administrator"))
+            {
+                return Forbid();
             }
 
             var result = await userManager.DeleteAsync(user);
@@ -158,5 +217,6 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             return Ok(new { Message = "User deleted successfully" });
         }
+
     }
 }
