@@ -12,8 +12,6 @@ namespace TertiarySchoolNavigator.Api.Domain
       : base(options)
         {
         }
-
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
