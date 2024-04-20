@@ -12,8 +12,8 @@ using TertiarySchoolNavigator.Api.Domain;
 namespace TertiarySchoolNavigator.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240420113325_InitialSchoolDB")]
-    partial class InitialSchoolDB
+    [Migration("20240420151359_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
