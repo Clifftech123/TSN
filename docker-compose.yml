@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: TertiarySchoolNavigator.Api/Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__sqlConnection=Server=db;Database=TertiarySchoolDB;Integrated Security=true;TrustServerCertificate=true;
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+      SA_PASSWORD: "clifford"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - dbdata:/var/opt/mssql
+volumes:
+  dbdata:
