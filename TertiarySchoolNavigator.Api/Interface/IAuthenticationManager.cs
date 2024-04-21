@@ -7,7 +7,11 @@ namespace TertiarySchoolNavigator.Api.Interface
     {
         Task<bool> AuthenticateUserAsync(LoginRequset loginRequest);
         Task<string> CreateTokenAsync();
+        object GenerateRefreshToken();
         Task<List<Claim>> GetClaimsAsync();
+     
 
     }
-}
+     
+
+    }

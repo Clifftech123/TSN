@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.AuthModels;
@@ -29,20 +30,11 @@ namespace TertiarySchoolNavigator.Api.Service
         public async Task<bool> AuthenticateUserAsync(LoginRequset loginRequest)
         {
             _user = await userManager.FindByEmailAsync(loginRequest.username);
-            //if (user == null)
-            //{
-            // Handle the null user case here. For example, you could throw an exception:
-            //  throw new ArgumentException("No user found with the provided email.");
-            // }
             var result = (_user is not null && await userManager.CheckPasswordAsync(_user, loginRequest.Password));
             return result;
         }
 
-
-
-
         // Create a JWT token for the authenticated user
-
 
         public async Task<string> CreateTokenAsync()
         {
@@ -100,8 +92,7 @@ namespace TertiarySchoolNavigator.Api.Service
         }
 
 
-
-        //
+         // Generate the token options with the provided signing credentials and claim
 
         private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
         {
@@ -114,6 +105,20 @@ namespace TertiarySchoolNavigator.Api.Service
             signingCredentials: signingCredentials);
             return tokenOptions;
         }
+
+
+
+        public object GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var generate = RandomNumberGenerator.Create();
+            generate.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+  
+
+
 
 
     }

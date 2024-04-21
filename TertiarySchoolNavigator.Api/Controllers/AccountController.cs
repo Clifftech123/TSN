@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TertiarySchoolNavigator.Api.Extensions;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.AuthModels;
 using TertiarySchoolNavigator.Api.Validators;
@@ -13,14 +14,19 @@ namespace TertiarySchoolNavigator.Api.Controllers
         private readonly IAuthenticationManager authenticationManager;
         private readonly RegisterRequestValidator registerRequestValidator;
         private readonly LoginRequestValidator loginRequestValidator;
+        private readonly ILogger<AccountController> _logger;
+        private readonly IConfiguration _configuration;
 
 
-        public AccountController(UserManager<User> userManager, IAuthenticationManager authenticationManager)
+
+        public AccountController(UserManager<User> userManager, IAuthenticationManager authenticationManager, ILogger<AccountController> logger, IConfiguration configuration)
         {
             this.userManager = userManager;
             this.authenticationManager = authenticationManager;
             registerRequestValidator = new RegisterRequestValidator();
             loginRequestValidator = new LoginRequestValidator();
+            _logger = logger;
+            _configuration = configuration;
         }
 
 
@@ -28,37 +34,62 @@ namespace TertiarySchoolNavigator.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequset loginModel)
         {
-            // Validate the login model
-            var validationResult = loginRequestValidator.Validate(loginModel);
-            if (!validationResult.IsValid)
+            try
             {
-                return BadRequest(validationResult.Errors);
-            }
+                _logger.LogInformation("User logging in");
 
-            // Find the user
-            var user = await userManager.FindByEmailAsync(loginModel.username);
-            if (user == null)
+                // Validate the login model
+                var validationResult = loginRequestValidator.Validate(loginModel);
+                if (!validationResult.IsValid)
+                {
+                    _logger.LogWarning("Invalid login request");
+                    return BadRequest(validationResult.Errors);
+                }
+
+                // Find the user
+                var user = await userManager.FindByEmailAsync(loginModel.username);
+                var isPasswordValid = user != null && await userManager.CheckPasswordAsync(user, loginModel.Password);
+                if (user == null || !isPasswordValid)
+                {
+                    _logger.LogWarning($"Failed login attempt for user {loginModel.username}");
+                    return BadRequest(new { Message = "Invalid username or password" });
+                }
+
+                // Authenticate the user
+                if (await authenticationManager.AuthenticateUserAsync(loginModel))
+                {
+                    var Token = await authenticationManager.CreateTokenAsync();
+                    var refreshToken = authenticationManager.GenerateRefreshToken();
+                    user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+
+                    await userManager.UpdateAsync(user);
+
+                    _logger.LogInformation("User logged in successfully");
+                    var userRole = await userManager.GetRolesAsync(user);
+                    return Ok(new { User = new { user.Id, user.UserName, user.FullName, user.Email, Token, refreshToken } });
+
+                }
+
+                _logger.LogWarning("Failed to authenticate user");
+                return Unauthorized(new { Message = "Invalid username or password" });
+            }
+            catch (Exception ex)
             {
-                return BadRequest(new { Message = $"User with email {loginModel.username} does not exist" });
+                _logger.LogError(ex, "Error occurred during login");
+                throw;
             }
-
-            // Authenticate the user
-            if (await authenticationManager.AuthenticateUserAsync(loginModel))
-            {
-                var token = await authenticationManager.CreateTokenAsync();
-                return Ok(new { Message = "User logged in successfully", Token = token, User = user });
-            }
-
-            return Unauthorized(new { Message = "Invalid username or password" });
         }
+
 
 
 
         // Register a new user
 
         [HttpPost("register-admin")]
+
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerModel)
         {
+            _logger.LogInformation("Registering a new user");
             // Validate the register model
             var validationResult = registerRequestValidator.Validate(registerModel);
             if (!validationResult.IsValid)
@@ -87,6 +118,8 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             if (!result.Succeeded)
             {
+                _logger.LogError("Error occured while registering a new user");
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.TryAddModelError(error.Code, error.Description);
@@ -97,6 +130,8 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             await userManager.AddToRoleAsync(user, "Administrator");
 
+            _logger.LogInformation("User registered successfully");
+
             return StatusCode(201, new { Message = "User registered successfully", User = user });
         }
 
@@ -104,9 +139,12 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         // Register a new user  for   user role
+
+
         [HttpPost("register-user")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterRequest registerModel)
         {
+            _logger.LogInformation("Registering a new user");
             // Validate the register model
             var validationResult = registerRequestValidator.Validate(registerModel);
             if (!validationResult.IsValid)
@@ -135,6 +173,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             if (!result.Succeeded)
             {
+                _logger.LogError("Error occured while registering a new user");
                 foreach (var error in result.Errors)
                 {
                     ModelState.TryAddModelError(error.Code, error.Description);
@@ -145,6 +184,8 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             // Add the user to the "User" role
             await userManager.AddToRoleAsync(user, "User");
+
+            _logger.LogInformation("User registered successfully");
 
             return StatusCode(201, new { Message = "User registered successfully", User = user });
         }
@@ -217,6 +258,96 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             return Ok(new { Message = "User deleted successfully" });
         }
+
+
+
+        // User logout both Admin and User
+
+        [HttpPost("logout")]
+
+        public async Task<IActionResult> Logout()
+        {
+            _logger.LogInformation("User logging out");
+
+            var username = HttpContext.User.Identity?.Name;
+
+            if (username is null)
+                return Unauthorized();
+
+            var user = await userManager.FindByNameAsync(username);
+
+            if (user is null)
+                return Unauthorized();
+
+            user.RefreshToken = null;
+
+            await userManager.UpdateAsync(user);
+
+            _logger.LogInformation("User logged out successfully");
+
+            return Ok();
+        }
+
+
+        // Refresh token
+        [HttpPost("Refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshModel refreshModel)
+        {
+            var principal = AuthServiceExtensions.GetPrincipalFromExpiredToken(refreshModel.AccessToken, _configuration);
+            var username = principal.Identity.Name;
+
+            var user = await userManager.FindByNameAsync(username);
+            if (user == null || user.RefreshToken != refreshModel.RefreshToken || user.RefreshTokenExpiry <= DateTime.Now)
+            {
+                return BadRequest(new { Message = "Invalid client request" });
+            }
+
+            var newAccessToken = await authenticationManager.CreateTokenAsync();
+            var newRefreshToken = authenticationManager.GenerateRefreshToken();
+
+            user.RefreshToken = (string)newRefreshToken;
+            user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+
+            await userManager.UpdateAsync(user);
+
+            return new ObjectResult(new
+            {
+                Token = newAccessToken,
+                RefreshToken = newRefreshToken
+            });
+        }
+
+
+        //revoke token
+
+        [HttpPost("Revoke")]
+        public async Task<IActionResult> Revoke()
+        {
+            _logger.LogInformation("Revoke called");
+
+            var username = HttpContext.User.Identity?.Name;
+
+            if (username is null)
+                return Unauthorized();
+
+            var user = await userManager.FindByNameAsync(username);
+
+            if (user is null)
+                return Unauthorized();
+
+            user.RefreshToken = null;
+
+            await userManager.UpdateAsync(user);
+
+            _logger.LogInformation("Revoke succeeded");
+
+            return Ok();
+        }
+
+
+
+
+
 
     }
 }
