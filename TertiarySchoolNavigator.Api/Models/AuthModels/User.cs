@@ -8,9 +8,9 @@ namespace TertiarySchoolNavigator.Api.Models.AuthModels
         public string LastName { get; set; }
         public string Gender { get; set; }
         public string? RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiry { get; set; }
+        public DateTime? RefreshTokenExpiry { get; set; }
 
         // user full name
-        public string FullName => $"{FirstName} {LastName}";
+ 
     }
 }

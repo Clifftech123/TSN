@@ -8,6 +8,11 @@ using TertiarySchoolNavigator.Api.Validators;
 
 namespace TertiarySchoolNavigator.Api.Controllers
 {
+
+
+    [ApiController]
+    [Route("api/account/v1")]
+
     public class AccountController : ControllerBase
     {
         private readonly UserManager<User> userManager;
@@ -19,7 +24,9 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
 
-        public AccountController(UserManager<User> userManager, IAuthenticationManager authenticationManager, ILogger<AccountController> logger, IConfiguration configuration)
+        public AccountController(UserManager<User> userManager,
+            IAuthenticationManager authenticationManager, ILogger<AccountController> logger,
+            IConfiguration configuration)
         {
             this.userManager = userManager;
             this.authenticationManager = authenticationManager;
@@ -30,53 +37,47 @@ namespace TertiarySchoolNavigator.Api.Controllers
         }
 
 
+
+        // Login a user  
+
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequset loginModel)
         {
             try
             {
-                _logger.LogInformation("User logging in");
-
                 // Validate the login model
-                var validationResult = loginRequestValidator.Validate(loginModel);
-                if (!validationResult.IsValid)
+                FluentValidation.Results.ValidationResult validationResult = loginRequestValidator.Validate(loginModel);
+                if (validationResult.IsValid)
                 {
-                    _logger.LogWarning("Invalid login request");
-                    return BadRequest(validationResult.Errors);
+                    var user = await userManager.FindByEmailAsync(loginModel.username);
+                    var isPasswordValid = user != null && await userManager.CheckPasswordAsync(user, loginModel.Password);
+                    if (user == null || !isPasswordValid)
+                    {
+                        return BadRequest(new { Message = "Invalid username or password" });
+                    }
+
+                    if (await authenticationManager.AuthenticateUserAsync(loginModel))
+                    {
+                        var token = await authenticationManager.CreateTokenAsync();
+                        var refreshToken = authenticationManager.GenerateRefreshToken();
+                        user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+
+                        await userManager.UpdateAsync(user);
+
+                        var userRole = await userManager.GetRolesAsync(user);
+                        return Ok(new { User = new { user.Id, user.UserName, user.FirstName, user.LastName, user.Email, Token = token, refreshToken } });
+                    }
+
+                    return Unauthorized(new { Message = "Invalid username or password" });
                 }
 
-                // Find the user
-                var user = await userManager.FindByEmailAsync(loginModel.username);
-                var isPasswordValid = user != null && await userManager.CheckPasswordAsync(user, loginModel.Password);
-                if (user == null || !isPasswordValid)
-                {
-                    _logger.LogWarning($"Failed login attempt for user {loginModel.username}");
-                    return BadRequest(new { Message = "Invalid username or password" });
-                }
-
-                // Authenticate the user
-                if (await authenticationManager.AuthenticateUserAsync(loginModel))
-                {
-                    var Token = await authenticationManager.CreateTokenAsync();
-                    var refreshToken = authenticationManager.GenerateRefreshToken();
-                    user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
-
-                    await userManager.UpdateAsync(user);
-
-                    _logger.LogInformation("User logged in successfully");
-                    var userRole = await userManager.GetRolesAsync(user);
-                    return Ok(new { User = new { user.Id, user.UserName, user.FullName, user.Email, Token, refreshToken } });
-
-                }
-
-                _logger.LogWarning("Failed to authenticate user");
-                return Unauthorized(new { Message = "Invalid username or password" });
+                return UnprocessableEntity(validationResult.Errors);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred during login");
-                throw;
+                _logger.LogError(ex, "An error occurred while logging in a user");
+                throw new BadHttpRequestException(ex.Message, StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -112,6 +113,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
                 Gender = registerModel.Gender,
                 Email = registerModel.Email,
                 UserName = registerModel.Email
+
             };
 
             var result = await userManager.CreateAsync(user, registerModel.Password);
@@ -195,7 +197,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
         // Get all user 
 
         [HttpGet("users")]
-        [Authorize(Roles = "Administrator")]
+        // [Authorize(Roles = "Administrator")]
         public IActionResult GetUsers()
         {
             var users = userManager.Users.ToList();
@@ -210,7 +212,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
         // Get user by id
 
         [HttpGet("users/{id}")]
-        [Authorize(Roles = "Administrator")]
+        // [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
@@ -226,7 +228,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         [HttpDelete("users/{id}")]
-        [Authorize]
+        /// [Authorize]
         public async Task<IActionResult> DeleteUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
@@ -343,6 +345,8 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             return Ok();
         }
+
+
 
 
 

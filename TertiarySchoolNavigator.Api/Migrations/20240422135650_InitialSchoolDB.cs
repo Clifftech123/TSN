@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TertiarySchoolNavigator.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class InitialSchoolDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,6 +35,8 @@ namespace TertiarySchoolNavigator.Api.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshTokenExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -166,8 +168,8 @@ namespace TertiarySchoolNavigator.Api.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("55fd2869-dde1-4ab6-825d-dce4f8c97567"), null, "Admin", "ADMIN" },
-                    { new Guid("9d8fda57-61ea-4aca-a243-13e0f0b0c655"), null, " User", "USER" }
+                    { new Guid("56674cb7-b33f-44c9-af6e-fd1724cbd613"), null, "Admin", "ADMIN" },
+                    { new Guid("d4d69352-f7af-4524-b7e1-cbf04b5a19e7"), null, " User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
