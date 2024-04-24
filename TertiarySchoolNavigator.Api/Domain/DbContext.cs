@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TertiarySchoolNavigator.Api.Config;
 using TertiarySchoolNavigator.Api.Models;
 using TertiarySchoolNavigator.Api.Models.AuthModels;
+using TertiarySchoolNavigator.Api.Models.SchoolModels;
 
 namespace TertiarySchoolNavigator.Api.Domain
 {
@@ -19,6 +20,7 @@ namespace TertiarySchoolNavigator.Api.Domain
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<School> Schools { get; set; }
 
     }
 }

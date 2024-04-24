@@ -21,6 +21,8 @@ builder.Services.AddSwaggerGen();
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SchoolCreateRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SchoolUpdateRequestValidator>();
 
 // Adding of Exceptions handle 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
