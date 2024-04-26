@@ -9,5 +9,7 @@ namespace TertiarySchoolNavigator.Api.Interface
         Task<List<School>> SearchSchools(SchoolSearchRequest request);
         Task<List<School>> GetAllSchools();
         Task<bool> DeleteSchool(int id);
+
+        Task<School> GetSchoolById(int id);
     }
 }

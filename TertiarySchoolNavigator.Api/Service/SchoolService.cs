@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TertiarySchoolNavigator.Api.Domain;
 using TertiarySchoolNavigator.Api.Interface;
+using TertiarySchoolNavigator.Api.Middleware;
 using TertiarySchoolNavigator.Api.Models.SchoolModels;
 
 namespace TertiarySchoolNavigator.Api.Service
@@ -18,6 +19,8 @@ namespace TertiarySchoolNavigator.Api.Service
             _context = context;
         }
 
+
+        // Create a new school
         public async Task<School> CreateSchool(SchoolCreateRequest request)
         {
             var school = new School
@@ -37,6 +40,7 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
 
+        // Update an existing school
         public async Task<School> UpdateSchool(SchoolUpdateRequest request)
         {
             var school = await _context.Schools.FindAsync(request.Id);
@@ -58,11 +62,22 @@ namespace TertiarySchoolNavigator.Api.Service
         }
 
 
+
+
+
+        // Get all schools
         public async Task<List<School>> GetAllSchools()
         {
-            return await _context.Schools.ToListAsync();
+            var schools = await _context.Schools.ToListAsync();
+            if (!schools.Any())
+            {
+                throw new Exception("No schools found");
+            }
+            return schools;
         }
 
+
+        // Search for schools by name, region, district, or established year
         public async Task<List<School>> SearchSchools(SchoolSearchRequest request)
         {
             var query = _context.Schools.AsQueryable();
@@ -87,11 +102,19 @@ namespace TertiarySchoolNavigator.Api.Service
                 query = query.Where(s => s.EstablishedYear == request.EstablishedYear.Value);
             }
 
+            var schools = await query.ToListAsync();
 
-            return await query.ToListAsync();
+            if (!schools.Any())
+            {
+                throw new Exception("No schools found matching the search criteria");
+            }
+
+            return schools;
         }
 
 
+
+        // Delete a school
         public async Task<bool> DeleteSchool(int id)
         {
             var school = await _context.Schools.FindAsync(id);
@@ -107,6 +130,18 @@ namespace TertiarySchoolNavigator.Api.Service
             return true;
         }
 
+
+        // Get a school by id
+        public async Task<School> GetSchoolById(int id)
+        {
+            var school = await _context.Schools.FindAsync(id);
+            if (school == null)
+            {
+                throw new Exception("School not found");
+            }
+
+            return school;
+        }
 
     }
 }
