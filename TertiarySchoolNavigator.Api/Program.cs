@@ -8,12 +8,6 @@ using TertiarySchoolNavigator.Api.Validators;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
-
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.ConfigureCors();
 builder.Services.ConfigureSqlContext(builder.Configuration);
@@ -24,18 +18,15 @@ builder.Services.AddScoped<IAuthenticationManager, AuthenticationService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SchoolCreateRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SchoolUpdateRequestValidator>();
 
-
-
-
-// Adding of Execeptions  handle 
+// Adding of Exceptions handle 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-
 
 var app = builder.Build();
 
@@ -47,6 +38,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
 
 app.UseAuthorization();
 app.UseExceptionHandler();

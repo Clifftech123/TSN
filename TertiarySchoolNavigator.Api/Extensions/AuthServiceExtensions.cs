@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -21,7 +20,7 @@ namespace TertiarySchoolNavigator.Api.Extensions
            services.AddDbContext<AppDbContext>(
     o => o.UseSqlServer(configuration.GetConnectionString("sqlConnection"),
         b => b.MigrationsAssembly("TertiarySchoolNavigator.Api")));
-    
+
 
 
         // Configure Identity Framework with the default settings and the custom User and Role classes
@@ -66,10 +65,10 @@ namespace TertiarySchoolNavigator.Api.Extensions
         }
 
 
-        public static ClaimsPrincipal GetPrincipalFromExpiredToken(string token , IConfiguration configuration)
+        public static ClaimsPrincipal GetPrincipalFromExpiredToken(string token, IConfiguration configuration)
         {
             var settings = configuration.GetSection(nameof(JWTSettings)).Get<JWTSettings>();
-             var secretKey = settings.SecretKey;
+            var secretKey = settings.SecretKey;
 
             var tokenValidationParameters = new TokenValidationParameters
             {

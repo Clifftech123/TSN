@@ -30,12 +30,18 @@ namespace TertiarySchoolNavigator.Api.Service
         public async Task<bool> AuthenticateUserAsync(LoginRequset loginRequest)
         {
             _user = await userManager.FindByEmailAsync(loginRequest.username);
+            //if (user == null)
+            //{
+            // Handle the null user case here. For example, you could throw an exception:
+            //  throw new ArgumentException("No user found with the provided email.");
+            // }
             var result = (_user is not null && await userManager.CheckPasswordAsync(_user, loginRequest.Password));
             return result;
         }
 
-        // Create a JWT token for the authenticated user
 
+
+        // Create a JWT token for the authenticated user
         public async Task<string> CreateTokenAsync()
         {
             var signingCredentials = GetSigningCredentials();
@@ -52,7 +58,6 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
         //  Get claims for the authenticated user
-
         public async Task<List<Claim>> GetClaimsAsync()
         {
             var claims = new List<Claim>();
@@ -74,7 +79,6 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
         // Generate the token options with the provided signing credentials and claim
-
         private SigningCredentials GetSigningCredentials()
         {
             var jwtSettings = configuration.GetSection("JWTSettings");
@@ -92,8 +96,7 @@ namespace TertiarySchoolNavigator.Api.Service
         }
 
 
-         // Generate the token options with the provided signing credentials and claim
-
+        // Generate the token options with the provided signing credentials and claim
         private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
         {
             var jwtSettings = configuration.GetSection("JWTSettings");
@@ -116,7 +119,7 @@ namespace TertiarySchoolNavigator.Api.Service
             return Convert.ToBase64String(randomNumber);
         }
 
-  
+
 
 
 

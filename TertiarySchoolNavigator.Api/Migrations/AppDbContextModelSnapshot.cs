@@ -183,7 +183,7 @@ namespace TertiarySchoolNavigator.Api.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("RefreshTokenExpiry")
+                    b.Property<DateTime?>("RefreshTokenExpiry")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
@@ -239,13 +239,13 @@ namespace TertiarySchoolNavigator.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ed892f81-a041-4b49-9748-3a16d503500d"),
+                            Id = new Guid("56674cb7-b33f-44c9-af6e-fd1724cbd613"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("0dfa5e77-10d6-461f-9970-93ccf9ee5292"),
+                            Id = new Guid("d4d69352-f7af-4524-b7e1-cbf04b5a19e7"),
                             Name = " User",
                             NormalizedName = "USER"
                         });

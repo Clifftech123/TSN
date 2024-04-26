@@ -9,9 +9,9 @@ namespace TertiarySchoolNavigator.Api.Interface
         Task<string> CreateTokenAsync();
         object GenerateRefreshToken();
         Task<List<Claim>> GetClaimsAsync();
-     
+
 
     }
-     
 
-    }
+
+}
