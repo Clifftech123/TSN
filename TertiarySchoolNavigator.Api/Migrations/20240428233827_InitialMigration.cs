@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TertiarySchoolNavigator.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSchoolDB : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -55,6 +55,23 @@ namespace TertiarySchoolNavigator.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schools",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    District = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EstablishedYear = table.Column<int>(type: "int", nullable: false),
+                    SchoolType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schools", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -168,8 +185,8 @@ namespace TertiarySchoolNavigator.Api.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("56674cb7-b33f-44c9-af6e-fd1724cbd613"), null, "Admin", "ADMIN" },
-                    { new Guid("d4d69352-f7af-4524-b7e1-cbf04b5a19e7"), null, " User", "USER" }
+                    { new Guid("7bb3f76f-7332-4052-b842-1039360c26f5"), null, "Admin", "ADMIN" },
+                    { new Guid("e1df953f-d5d0-4513-811c-dbd4b6f93931"), null, " User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -229,6 +246,9 @@ namespace TertiarySchoolNavigator.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Schools");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

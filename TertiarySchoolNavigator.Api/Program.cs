@@ -14,6 +14,7 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddScoped<IAuthenticationManager, AuthenticationService>();
+builder.Services.AddScoped<ISchoolService, SchoolService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
