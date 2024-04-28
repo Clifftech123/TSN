@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TertiarySchoolNavigator.Api.Interface;
+using TertiarySchoolNavigator.Api.Middleware;
 using TertiarySchoolNavigator.Api.Models.SchoolModels;
 using TertiarySchoolNavigator.Api.Models.SchoolModels.TertiarySchoolNavigator.Api.Models.SchoolModels;
 
@@ -41,8 +42,9 @@ namespace TertiarySchoolNavigator.Api.Controllers
             };
 
             return CreatedAtAction(nameof(GetSchoolById), new { id = school.Id }, response);
-        }
+        }   
 
+       
 
 
 
@@ -122,6 +124,10 @@ namespace TertiarySchoolNavigator.Api.Controllers
         public async Task<ActionResult<IEnumerable<School>>> GetAllSchools()
         {
             var schools = await _schoolService.GetAllSchools();
+            if(schools == null )
+            {
+                throw new BadHttpRequestException("No School Found in  the database", StatusCodes.Status400BadRequest);
+            }
             return Ok(schools);
         }
 

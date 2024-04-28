@@ -29,7 +29,9 @@ namespace TertiarySchoolNavigator.Api.Service
                 Region = request.Region,
                 District = request.District,
                 EstablishedYear = request.EstablishedYear,
-                // Add other properties here
+                SchoolType = request.SchoolType,
+
+              
             };
 
             _context.Schools.Add(school);
@@ -54,7 +56,7 @@ namespace TertiarySchoolNavigator.Api.Service
             school.Region = request.Region;
             school.District = request.District;
             school.EstablishedYear = request.EstablishedYear;
-            // Update other properties here
+            school.SchoolType = request.SchoolType;
 
             await _context.SaveChangesAsync();
 

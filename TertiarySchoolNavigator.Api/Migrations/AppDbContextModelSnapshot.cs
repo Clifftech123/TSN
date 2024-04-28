@@ -239,16 +239,48 @@ namespace TertiarySchoolNavigator.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("56674cb7-b33f-44c9-af6e-fd1724cbd613"),
+                            Id = new Guid("7bb3f76f-7332-4052-b842-1039360c26f5"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("d4d69352-f7af-4524-b7e1-cbf04b5a19e7"),
+                            Id = new Guid("e1df953f-d5d0-4513-811c-dbd4b6f93931"),
                             Name = " User",
                             NormalizedName = "USER"
                         });
+                });
+
+            modelBuilder.Entity("TertiarySchoolNavigator.Api.Models.SchoolModels.School", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EstablishedYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Region")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SchoolType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Schools");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
