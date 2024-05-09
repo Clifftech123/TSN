@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TertiarySchoolNavigator.Api.Contracts.School;
 using TertiarySchoolNavigator.Api.Domain;
 using TertiarySchoolNavigator.Api.Interface;
-using TertiarySchoolNavigator.Api.Middleware;
 using TertiarySchoolNavigator.Api.Models.SchoolModels;
 
 namespace TertiarySchoolNavigator.Api.Service
@@ -21,9 +21,9 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
         // Create a new school
-        public async Task<School> CreateSchool(SchoolCreateRequest request)
+        public async Task<Schoolmodole> CreateSchool(SchoolCreateRequest request)
         {
-            var school = new School
+            var school = new Schoolmodole
             {
                 Name = request.Name,
                 Region = request.Region,
@@ -31,7 +31,7 @@ namespace TertiarySchoolNavigator.Api.Service
                 EstablishedYear = request.EstablishedYear,
                 SchoolType = request.SchoolType,
 
-              
+
             };
 
             _context.Schools.Add(school);
@@ -41,9 +41,8 @@ namespace TertiarySchoolNavigator.Api.Service
         }
 
 
-
         // Update an existing school
-        public async Task<School> UpdateSchool(SchoolUpdateRequest request)
+        public async Task<Schoolmodole> UpdateSchool(SchoolUpdateRequest request)
         {
             var school = await _context.Schools.FindAsync(request.Id);
             if (school == null)
@@ -64,11 +63,8 @@ namespace TertiarySchoolNavigator.Api.Service
         }
 
 
-
-
-
         // Get all schools
-        public async Task<List<School>> GetAllSchools()
+        public async Task<List<Schoolmodole>> GetAllSchools()
         {
             var schools = await _context.Schools.ToListAsync();
             if (!schools.Any())
@@ -80,7 +76,7 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
         // Search for schools by name, region, district, or established year
-        public async Task<List<School>> SearchSchools(SchoolSearchRequest request)
+        public async Task<List<Schoolmodole>> SearchSchools(SchoolSearchRequest request)
         {
             var query = _context.Schools.AsQueryable();
 
@@ -134,7 +130,7 @@ namespace TertiarySchoolNavigator.Api.Service
 
 
         // Get a school by id
-        public async Task<School> GetSchoolById(int id)
+        public async Task<Schoolmodole> GetSchoolById(int id)
         {
             var school = await _context.Schools.FindAsync(id);
             if (school == null)

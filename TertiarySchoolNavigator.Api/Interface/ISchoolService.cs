@@ -1,15 +1,16 @@
-﻿using TertiarySchoolNavigator.Api.Models.SchoolModels;
+﻿using TertiarySchoolNavigator.Api.Contracts.School;
+using TertiarySchoolNavigator.Api.Models.SchoolModels;
 
 namespace TertiarySchoolNavigator.Api.Interface
 {
     public interface ISchoolService
     {
-        Task<School> CreateSchool(SchoolCreateRequest request);
-        Task<School> UpdateSchool(SchoolUpdateRequest request);
-        Task<List<School>> SearchSchools(SchoolSearchRequest request);
-        Task<List<School>> GetAllSchools();
+        Task<Schoolmodole> CreateSchool(SchoolCreateRequest request);
+        Task<Schoolmodole> UpdateSchool(SchoolUpdateRequest request);
+        Task<List<Schoolmodole>> SearchSchools(SchoolSearchRequest request);
+        Task<List<Schoolmodole>> GetAllSchools();
         Task<bool> DeleteSchool(int id);
 
-        Task<School> GetSchoolById(int id);
+        Task<Schoolmodole> GetSchoolById(int id);
     }
 }

@@ -16,8 +16,16 @@ builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddScoped<IAuthenticationManager, AuthenticationService>();
 builder.Services.AddScoped<ISchoolService, SchoolService>();
 
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+// Configure Automaper 
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();

@@ -1,6 +1,6 @@
 ﻿namespace TertiarySchoolNavigator.Api.Models.SchoolModels
 {
-    public class School
+    public class Schoolmodole
     {
         public int Id { get; set; }
         public string Name { get; set; }

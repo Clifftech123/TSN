@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using TertiarySchoolNavigator.Api.Models.SchoolModels;
+using TertiarySchoolNavigator.Api.Contracts.School;
 
 public class SchoolUpdateRequestValidator : AbstractValidator<SchoolUpdateRequest>
 {

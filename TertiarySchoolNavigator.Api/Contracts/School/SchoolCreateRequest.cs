@@ -1,4 +1,4 @@
-﻿namespace TertiarySchoolNavigator.Api.Models.SchoolModels
+﻿namespace TertiarySchoolNavigator.Api.Contracts.School
 {
     public class SchoolCreateRequest
     {

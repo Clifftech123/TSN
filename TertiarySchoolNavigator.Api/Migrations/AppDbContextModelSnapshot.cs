@@ -138,6 +138,9 @@ namespace TertiarySchoolNavigator.Api.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -192,6 +195,9 @@ namespace TertiarySchoolNavigator.Api.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -239,19 +245,19 @@ namespace TertiarySchoolNavigator.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7bb3f76f-7332-4052-b842-1039360c26f5"),
+                            Id = new Guid("dfc5a9cd-2468-4401-aed2-224415cb0919"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("e1df953f-d5d0-4513-811c-dbd4b6f93931"),
+                            Id = new Guid("67ad6c92-0340-4542-865a-b0077e4bb5b4"),
                             Name = " User",
                             NormalizedName = "USER"
                         });
                 });
 
-            modelBuilder.Entity("TertiarySchoolNavigator.Api.Models.SchoolModels.School", b =>
+            modelBuilder.Entity("TertiarySchoolNavigator.Api.Models.SchoolModels.Schoolmodole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

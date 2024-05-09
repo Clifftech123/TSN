@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TertiarySchoolNavigator.Api.Contracts.School;
 using TertiarySchoolNavigator.Api.Interface;
-using TertiarySchoolNavigator.Api.Middleware;
 using TertiarySchoolNavigator.Api.Models.SchoolModels;
 using TertiarySchoolNavigator.Api.Models.SchoolModels.TertiarySchoolNavigator.Api.Models.SchoolModels;
 
@@ -42,16 +42,16 @@ namespace TertiarySchoolNavigator.Api.Controllers
             };
 
             return CreatedAtAction(nameof(GetSchoolById), new { id = school.Id }, response);
-        }   
+        }
 
-       
+
 
 
 
         // Get a school by id
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<School>> GetSchoolById(int id)
+        public async Task<ActionResult<Schoolmodole>> GetSchoolById(int id)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
         // Search for schools by name, region, district, or established year
         [HttpPost("search")]
-        public async Task<ActionResult<List<School>>> SearchSchools(SchoolSearchRequest request)
+        public async Task<ActionResult<List<Schoolmodole>>> SearchSchools(SchoolSearchRequest request)
         {
             try
             {
@@ -121,10 +121,10 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
         //  Get all schools
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<School>>> GetAllSchools()
+        public async Task<ActionResult<IEnumerable<Schoolmodole>>> GetAllSchools()
         {
             var schools = await _schoolService.GetAllSchools();
-            if(schools == null )
+            if (schools == null)
             {
                 throw new BadHttpRequestException("No School Found in  the database", StatusCodes.Status400BadRequest);
             }

@@ -1,6 +1,6 @@
-﻿namespace TertiarySchoolNavigator.Api.Models.AuthModels
+﻿namespace TertiarySchoolNavigator.Api.Contracts.Auth
 {
-    public class LoginResponse
+    public class LoginUserResponse
     {
         public required string JwtToken { get; set; }
         public DateTime Expiration { get; set; }

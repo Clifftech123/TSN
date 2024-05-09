@@ -4,8 +4,8 @@
     {
         public class SchoolResponse
         {
-            public School School { get; set; }
-            public string Message { get; set; } 
+            public Schoolmodole School { get; set; }
+            public string Message { get; set; }
         }
     }
 

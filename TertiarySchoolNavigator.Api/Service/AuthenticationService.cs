@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using TertiarySchoolNavigator.Api.Contracts.Auth;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.AuthModels;
 
@@ -27,7 +28,7 @@ namespace TertiarySchoolNavigator.Api.Service
 
         // Authenticate the user with the provided credentials
 
-        public async Task<bool> AuthenticateUserAsync(LoginRequset loginRequest)
+        public async Task<bool> AuthenticateUserAsync(LoginUserRequset loginRequest)
         {
             _user = await userManager.FindByEmailAsync(loginRequest.username);
             //if (user == null)

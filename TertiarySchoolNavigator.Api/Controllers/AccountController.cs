@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TertiarySchoolNavigator.Api.Contracts.Auth;
 using TertiarySchoolNavigator.Api.Extensions;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.AuthModels;
@@ -17,6 +19,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
     {
         private readonly UserManager<User> userManager;
         private readonly IAuthenticationManager authenticationManager;
+        private readonly IMapper _mapper;
         private readonly RegisterRequestValidator registerRequestValidator;
         private readonly LoginRequestValidator loginRequestValidator;
         private readonly ILogger<AccountController> _logger;
@@ -25,11 +28,13 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         public AccountController(UserManager<User> userManager,
-            IAuthenticationManager authenticationManager, ILogger<AccountController> logger,
+            IAuthenticationManager authenticationManager, IMapper mapper, ILogger<AccountController> logger,
             IConfiguration configuration)
         {
             this.userManager = userManager;
             this.authenticationManager = authenticationManager;
+            _mapper = mapper;
+
             registerRequestValidator = new RegisterRequestValidator();
             loginRequestValidator = new LoginRequestValidator();
             _logger = logger;
@@ -42,7 +47,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequset loginModel)
+        public async Task<IActionResult> Login([FromBody] LoginUserRequset loginModel)
         {
             try
             {
@@ -66,7 +71,8 @@ namespace TertiarySchoolNavigator.Api.Controllers
                         await userManager.UpdateAsync(user);
 
                         var userRole = await userManager.GetRolesAsync(user);
-                        return Ok(new { User = new { user.Id, user.UserName, user.FirstName, user.LastName, user.Email, Token = token, refreshToken } });
+                        return Ok(new { User = new { user.Id, user.UserName, user.FirstName, user.LastName, user.Email, Roles = userRole, Token = token, refreshToken } });
+
                     }
 
                     return Unauthorized(new { Message = "Invalid username or password" });
@@ -88,7 +94,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
         [HttpPost("register-admin")]
 
-        public async Task<IActionResult> Register([FromBody] RegisterRequest registerModel)
+        public async Task<IActionResult> Register([FromBody] RegisterUserRequest registerModel)
         {
             _logger.LogInformation("Registering a new user");
             // Validate the register model
@@ -106,16 +112,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
             }
 
             // Create a new user
-            var user = new User
-            {
-                FirstName = registerModel.Firstname,
-                LastName = registerModel.Lastname,
-                Gender = registerModel.Gender,
-                Email = registerModel.Email,
-                UserName = registerModel.Email
-
-            };
-
+            var user = _mapper.Map<User>(registerModel);
             var result = await userManager.CreateAsync(user, registerModel.Password);
 
             if (!result.Succeeded)
@@ -144,7 +141,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         [HttpPost("register-user")]
-        public async Task<IActionResult> RegisterUser([FromBody] RegisterRequest registerModel)
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest registerModel)
         {
             _logger.LogInformation("Registering a new user");
             // Validate the register model
@@ -162,14 +159,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
             }
 
             // Create a new user
-            var user = new User
-            {
-                FirstName = registerModel.Firstname,
-                LastName = registerModel.Lastname,
-                Gender = registerModel.Gender,
-                Email = registerModel.Email,
-                UserName = registerModel.Email
-            };
+            var user = _mapper.Map<User>(registerModel);
 
             var result = await userManager.CreateAsync(user, registerModel.Password);
 
@@ -260,6 +250,43 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
             return Ok(new { Message = "User deleted successfully" });
         }
+
+
+
+
+
+        // Update User 
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest updateUserModel)
+        {
+            // Find the user by id
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { Message = $"User with id {id} does not exist" });
+            }
+
+            // Update the user properties
+            user.FirstName = updateUserModel.FirstName;
+            user.LastName = updateUserModel.LastName;
+            user.Email = updateUserModel.Email;
+
+            // Save the changes
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new { Message = "User updated successfully", User = user });
+        }
+
 
 
 

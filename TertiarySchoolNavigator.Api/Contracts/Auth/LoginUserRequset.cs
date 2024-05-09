@@ -1,6 +1,6 @@
-﻿namespace TertiarySchoolNavigator.Api.Models.AuthModels
+﻿namespace TertiarySchoolNavigator.Api.Contracts.Auth
 {
-    public class LoginRequset
+    public class LoginUserRequset
     {
 
         public required string username { get; set; }

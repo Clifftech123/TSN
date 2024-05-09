@@ -1,10 +1,10 @@
 ﻿
 using FluentValidation;
-using TertiarySchoolNavigator.Api.Models.AuthModels;
+using TertiarySchoolNavigator.Api.Contracts.Auth;
 
 namespace TertiarySchoolNavigator.Api.Validators
 {
-    public class LoginRequestValidator : AbstractValidator<LoginRequset>
+    public class LoginRequestValidator : AbstractValidator<LoginUserRequset>
     {
         public LoginRequestValidator()
         {
