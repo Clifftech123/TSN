@@ -52,33 +52,26 @@ namespace TertiarySchoolNavigator.Api.Controllers
             try
             {
                 // Validate the login model
-                FluentValidation.Results.ValidationResult validationResult = loginRequestValidator.Validate(loginModel);
-                if (validationResult.IsValid)
+                var validationResult = loginRequestValidator.Validate(loginModel);
+                if (!validationResult.IsValid) return UnprocessableEntity(validationResult.Errors);
+                var user = await userManager.FindByEmailAsync(loginModel.username);
+                var isPasswordValid = user != null && await userManager.CheckPasswordAsync(user, loginModel.Password);
+                if (user == null || !isPasswordValid)
                 {
-                    var user = await userManager.FindByEmailAsync(loginModel.username);
-                    var isPasswordValid = user != null && await userManager.CheckPasswordAsync(user, loginModel.Password);
-                    if (user == null || !isPasswordValid)
-                    {
-                        return BadRequest(new { Message = "Invalid username or password" });
-                    }
-
-                    if (await authenticationManager.AuthenticateUserAsync(loginModel))
-                    {
-                        var token = await authenticationManager.CreateTokenAsync();
-                        var refreshToken = authenticationManager.GenerateRefreshToken();
-                        user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
-
-                        await userManager.UpdateAsync(user);
-
-                        var userRole = await userManager.GetRolesAsync(user);
-                        return Ok(new { User = new { user.Id, user.UserName, user.FirstName, user.LastName, user.Email, Roles = userRole, Token = token, refreshToken } });
-
-                    }
-
-                    return Unauthorized(new { Message = "Invalid username or password" });
+                    return BadRequest(new { Message = "Invalid username or password" });
                 }
 
-                return UnprocessableEntity(validationResult.Errors);
+                if (!await authenticationManager.AuthenticateUserAsync(loginModel))
+                    return Unauthorized(new { Message = "Invalid username or password" });
+                var token = await authenticationManager.CreateTokenAsync();
+                var refreshToken = authenticationManager.GenerateRefreshToken();
+                user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+
+                await userManager.UpdateAsync(user);
+
+                var userRole = await userManager.GetRolesAsync(user);
+                return Ok(new { User = new { user.Id, user.UserName, user.FirstName, user.LastName, user.Email, Roles = userRole, Token = token, refreshToken } });
+
             }
             catch (Exception ex)
             {
@@ -187,7 +180,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
         // Get all user 
 
         [HttpGet("users")]
-        // [Authorize(Roles = "Administrator")]
+         [Authorize(Roles = "Administrator")]
         public IActionResult GetUsers()
         {
             var users = userManager.Users.ToList();
@@ -202,7 +195,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
         // Get user by id
 
         [HttpGet("users/{id}")]
-        // [Authorize(Roles = "Administrator")]
+         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
@@ -218,7 +211,7 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         [HttpDelete("users/{id}")]
-        /// [Authorize]
+         [Authorize]
         public async Task<IActionResult> DeleteUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
