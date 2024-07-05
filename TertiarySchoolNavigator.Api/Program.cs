@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.OpenApi.Models;
 using TertiarySchoolNavigator.Api.Extensions;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Middleware;
@@ -37,6 +38,35 @@ builder.Services.AddValidatorsFromAssemblyContaining<SchoolUpdateRequestValidato
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// Configure Swagger to include Bearer token input
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token in the following format: Bearer {your token here}"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,7 +82,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 app.UseExceptionHandler();
-
 app.MapControllers();
 
 app.Run();
