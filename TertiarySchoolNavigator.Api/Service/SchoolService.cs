@@ -1,145 +1,52 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TertiarySchoolNavigator.Api.Contracts.School;
-using TertiarySchoolNavigator.Api.Domain;
+﻿
+using System.Text.Json;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.SchoolModels;
 
 namespace TertiarySchoolNavigator.Api.Service
 {
     public class SchoolService : ISchoolService
-
-
     {
-        // Inject AppDbContext
-        private readonly AppDbContext _context;
+        private readonly string _jsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SchoolData.json");
 
-        // Constructor for SchoolService
-        public SchoolService(AppDbContext context)
+        private async Task<List<SchoolData>> LoadSchoolDataAsync()
         {
-            _context = context;
+            using FileStream openStream = File.OpenRead(_jsonFilePath);
+            var schoolData = await JsonSerializer.DeserializeAsync<List<SchoolData>>(openStream);
+            return schoolData ?? new List<SchoolData>();
         }
 
-
-        // Create a new school
-        public async Task<Schoolmodole> CreateSchool(SchoolCreateRequest request)
+        public async Task<List<SchoolData>> GetAllSchools()
         {
-            var school = new Schoolmodole
+            try
             {
-                Name = request.Name,
-                Region = request.Region,
-                District = request.District,
-                EstablishedYear = request.EstablishedYear,
-                SchoolType = request.SchoolType,
-
-
-            };
-
-            _context.Schools.Add(school);
-            await _context.SaveChangesAsync();
-
-            return school;
+                return await LoadSchoolDataAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading school data: {ex.Message}");
+                return new List<SchoolData>(); // Return an empty list in case of error
+            }
         }
 
-
-        // Update an existing school
-        public async Task<Schoolmodole> UpdateSchool(SchoolUpdateRequest request)
+        public async Task<List<SchoolData>> SearchSchools(string name, string location, string nickname)
         {
-            var school = await _context.Schools.FindAsync(request.Id);
-            if (school == null)
+            try
             {
-                // Handle the case where the school doesn't exist
-                return null;
+                var schools = await LoadSchoolDataAsync();
+                return schools.Where(s =>
+                    (!string.IsNullOrEmpty(name) && s.Name.Contains(name, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(nickname) && s.Nickname.Contains(nickname, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(location) && s.Location.Any(l => l.Contains(location, StringComparison.OrdinalIgnoreCase))) ||
+                    (!string.IsNullOrEmpty(s.Region) && s.Region.Contains(location, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(s.District) && s.District.Contains(location, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
             }
-
-            school.Name = request.Name;
-            school.Region = request.Region;
-            school.District = request.District;
-            school.EstablishedYear = request.EstablishedYear;
-            school.SchoolType = request.SchoolType;
-
-            await _context.SaveChangesAsync();
-
-            return school;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error searching school data: {ex.Message}");
+                return new List<SchoolData>(); // Return an empty list in case of error
+            }
         }
-
-
-        // Get all schools
-        public async Task<List<Schoolmodole>> GetAllSchools()
-        {
-            var schools = await _context.Schools.ToListAsync();
-            if (!schools.Any())
-            {
-                throw new Exception("No schools found");
-            }
-            return schools;
-        }
-
-
-        // Search for schools by name, region, district, or established year
-        public async Task<List<Schoolmodole>> SearchSchools(SchoolSearchRequest request)
-        {
-            var query = _context.Schools.AsQueryable();
-
-            if (!string.IsNullOrEmpty(request.Name))
-            {
-                query = query.Where(s => s.Name.Contains(request.Name));
-            }
-
-            if (!string.IsNullOrEmpty(request.Region))
-            {
-                query = query.Where(s => s.Region == request.Region);
-            }
-
-            if (!string.IsNullOrEmpty(request.District))
-            {
-                query = query.Where(s => s.District == request.District);
-            }
-
-            if (request.EstablishedYear.HasValue)
-            {
-                query = query.Where(s => s.EstablishedYear == request.EstablishedYear.Value);
-            }
-
-            var schools = await query.ToListAsync();
-
-            if (!schools.Any())
-            {
-                throw new Exception("No schools found matching the search criteria");
-            }
-
-            return schools;
-        }
-
-
-
-        // Delete a school
-        public async Task<bool> DeleteSchool(int id)
-        {
-            var school = await _context.Schools.FindAsync(id);
-            if (school == null)
-            {
-
-                return false;
-            }
-
-            _context.Schools.Remove(school);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-
-        // Get a school by id
-        public async Task<Schoolmodole> GetSchoolById(int id)
-        {
-            var school = await _context.Schools.FindAsync(id);
-            if (school == null)
-            {
-                throw new Exception("School not found");
-            }
-
-            return school;
-        }
-
     }
 }

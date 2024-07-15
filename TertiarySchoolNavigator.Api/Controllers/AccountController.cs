@@ -81,47 +81,46 @@ namespace TertiarySchoolNavigator.Api.Controllers
         }
 
 
-
-
-        // Register a new user
+        
+        // Register a new user  for   admin role
 
         [HttpPost("register-admin")]
-
         public async Task<IActionResult> Register([FromBody] RegisterUserRequest registerModel)
         {
             _logger.LogInformation("Registering a new user");
-            // Validate the register model
+
+            // Validate the register model using injected validators
             var validationResult = registerRequestValidator.Validate(registerModel);
             if (!validationResult.IsValid)
             {
-                throw new BadHttpRequestException("Invalid input", StatusCodes.Status400BadRequest);
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return BadRequest(ModelState);
             }
 
             // Check if a user with the same email already exists
             var existingUser = await userManager.FindByEmailAsync(registerModel.Email);
             if (existingUser != null)
             {
-                throw new BadHttpRequestException("User with the same email already exists", StatusCodes.Status400BadRequest);
+                ModelState.AddModelError("Email", "User with the same email already exists");
+                return BadRequest(ModelState);
             }
 
             // Create a new user
             var user = _mapper.Map<User>(registerModel);
             var result = await userManager.CreateAsync(user, registerModel.Password);
-
             if (!result.Succeeded)
             {
-                _logger.LogError("Error occured while registering a new user");
-
                 foreach (var error in result.Errors)
                 {
-                    ModelState.TryAddModelError(error.Code, error.Description);
+                    ModelState.AddModelError(error.Code, error.Description);
                 }
-
                 return BadRequest(ModelState);
             }
 
             await userManager.AddToRoleAsync(user, "Administrator");
-
             _logger.LogInformation("User registered successfully");
 
             return StatusCode(201, new { Message = "User registered successfully", User = user });
@@ -129,47 +128,46 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
 
-
-        // Register a new user  for   user role
-
-
+        // Register a new user  for   user role 
         [HttpPost("register-user")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest registerModel)
         {
             _logger.LogInformation("Registering a new user");
-            // Validate the register model
+
+            // Validate the register model using injected validators
             var validationResult = registerRequestValidator.Validate(registerModel);
             if (!validationResult.IsValid)
             {
-                throw new BadHttpRequestException("Invalid input", StatusCodes.Status400BadRequest);
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return BadRequest(ModelState);
             }
 
             // Check if a user with the same email already exists
             var existingUser = await userManager.FindByEmailAsync(registerModel.Email);
             if (existingUser != null)
             {
-                throw new BadHttpRequestException("User with the same email already exists", StatusCodes.Status400BadRequest);
+                ModelState.AddModelError("Email", "User with the same email already exists");
+                return BadRequest(ModelState);
             }
 
             // Create a new user
             var user = _mapper.Map<User>(registerModel);
-
             var result = await userManager.CreateAsync(user, registerModel.Password);
-
             if (!result.Succeeded)
             {
-                _logger.LogError("Error occured while registering a new user");
+                _logger.LogError("Error occurred while registering a new user");
                 foreach (var error in result.Errors)
                 {
-                    ModelState.TryAddModelError(error.Code, error.Description);
+                    ModelState.AddModelError(error.Code, error.Description);
                 }
-
                 return BadRequest(ModelState);
             }
 
             // Add the user to the "User" role
             await userManager.AddToRoleAsync(user, "User");
-
             _logger.LogInformation("User registered successfully");
 
             return StatusCode(201, new { Message = "User registered successfully", User = user });
@@ -178,73 +176,94 @@ namespace TertiarySchoolNavigator.Api.Controllers
 
 
         // Get all user 
-
         [HttpGet("users")]
-         [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator")]
         public IActionResult GetUsers()
         {
             var users = userManager.Users.ToList();
             if (users.Count == 0)
             {
-                throw new BadHttpRequestException("No user found", StatusCodes.Status404NotFound);
+                _logger.LogInformation("No users found");
+                // Returning an empty list to indicate no users found
+                return Ok(new List<User>());
             }
+            _logger.LogInformation($"Retrieved {users.Count} users");
             return Ok(users);
         }
 
 
         // Get user by id
 
+    
         [HttpGet("users/{id}")]
-         [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUser(string id)
         {
             var user = await userManager.FindByIdAsync(id);
             if (user == null)
             {
-                return NotFound(new { Message = $"User with id {id} does not exist" });
+                return NotFound(new { Message = $"User with ID {id} does not exist." });
             }
-            return Ok(user);
+
+            var userDto = new 
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.PhoneNumber,
+                user.RefreshToken,
+                user.RefreshTokenExpiry
+                
+            };
+
+            return Ok(userDto);
         }
 
 
         // delete user by id
 
-
         [HttpDelete("users/{id}")]
-         [Authorize]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            var user = await userManager.FindByIdAsync(id);
-            if (user == null)
+            _logger.LogInformation($"Attempting to delete user with ID: {id}");
+
+            // Find the user to delete
+            var userToDelete = await userManager.FindByIdAsync(id);
+            if (userToDelete == null)
             {
-                return NotFound(new { Message = $"User with id {id} does not exist" });
+                _logger.LogWarning($"User with ID: {id} not found for deletion.");
+                return NotFound(new { Message = $"User with ID: {id} does not exist." });
             }
+            
+            // Check if the requesting user is an admin or the user to be deleted
 
-            // Get the current user
-            var currentUser = await userManager.GetUserAsync(User);
+            var requestingUser = await userManager.GetUserAsync(User);
+            var isRequestingUserAdmin = await userManager.IsInRoleAsync(requestingUser, "Administrator");
 
-            // Check if the current user is the same as the user to be deleted or if the current user is an admin
-            if (currentUser.Id != user.Id && !await userManager.IsInRoleAsync(currentUser, "Administrator"))
+            if (requestingUser.Id != userToDelete.Id && !isRequestingUserAdmin)
             {
+                _logger.LogWarning($"User with ID: {requestingUser.Id} attempted to delete user with ID: {id} without sufficient permissions.");
                 return Forbid();
             }
 
-            var result = await userManager.DeleteAsync(user);
-
-            if (!result.Succeeded)
+            // Delete the user
+            var deletionResult = await userManager.DeleteAsync(userToDelete);
+            if (!deletionResult.Succeeded)
             {
-                foreach (var error in result.Errors)
+                _logger.LogError($"Failed to delete user with ID: {id}. Errors: {string.Join(", ", deletionResult.Errors.Select(e => e.Description))}");
+                foreach (var error in deletionResult.Errors)
                 {
                     ModelState.TryAddModelError(error.Code, error.Description);
                 }
-
                 return BadRequest(ModelState);
             }
 
-            return Ok(new { Message = "User deleted successfully" });
+            _logger.LogInformation($"User with ID: {id} deleted successfully.");
+            return Ok(new { Message = "User deleted successfully." });
         }
-
-
 
 
 
@@ -252,20 +271,29 @@ namespace TertiarySchoolNavigator.Api.Controllers
         [HttpPut("users/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest updateUserModel)
         {
+            var currentUser = await userManager.GetUserAsync(User);
+            var isCurrentUserAdmin = await userManager.IsInRoleAsync(currentUser, "Administrator");
+
             // Find the user by id
-            var user = await userManager.FindByIdAsync(id);
-            if (user == null)
+            var userToUpdate = await userManager.FindByIdAsync(id);
+            if (userToUpdate == null)
             {
                 return NotFound(new { Message = $"User with id {id} does not exist" });
             }
 
+            // Check if the current user is allowed to update the target user
+            if (!isCurrentUserAdmin && currentUser.Id != userToUpdate.Id)
+            {
+                return Forbid("You do not have permission to update this user");
+            }
+
             // Update the user properties
-            user.FirstName = updateUserModel.FirstName;
-            user.LastName = updateUserModel.LastName;
-            user.Email = updateUserModel.Email;
+            userToUpdate.FirstName = updateUserModel.FirstName;
+            userToUpdate.LastName = updateUserModel.LastName;
+            userToUpdate.Email = updateUserModel.Email;
 
             // Save the changes
-            var result = await userManager.UpdateAsync(user);
+            var result = await userManager.UpdateAsync(userToUpdate);
 
             if (!result.Succeeded)
             {
@@ -277,95 +305,129 @@ namespace TertiarySchoolNavigator.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            return Ok(new { Message = "User updated successfully", User = user });
+            return Ok(new { Message = "User updated successfully", User = userToUpdate });
         }
 
 
 
 
         // User logout both Admin and User
-
+        /// <summary>
+        /// Logs out the current user by clearing their refresh token.
+        /// </summary>
+        /// <returns>An IActionResult indicating the outcome of the logout operation.</returns>
         [HttpPost("logout")]
-
         public async Task<IActionResult> Logout()
         {
-            _logger.LogInformation("User logging out");
+            _logger.LogInformation("Initiating user logout process.");
 
             var username = HttpContext.User.Identity?.Name;
-
-            if (username is null)
-                return Unauthorized();
+            if (string.IsNullOrEmpty(username))
+            {
+                _logger.LogWarning("Logout attempt failed: Username is null or empty.");
+                return Unauthorized(new { Message = "You must be logged in to log out." });
+            }
 
             var user = await userManager.FindByNameAsync(username);
-
-            if (user is null)
-                return Unauthorized();
+            if (user == null)
+            {
+                _logger.LogWarning($"Logout attempt failed: User '{username}' not found.");
+                return Unauthorized(new { Message = "User not found." });
+            }
 
             user.RefreshToken = null;
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                _logger.LogError($"Failed to log out user '{username}'.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "An error occurred while logging out." });
+            }
 
-            await userManager.UpdateAsync(user);
-
-            _logger.LogInformation("User logged out successfully");
-
-            return Ok();
+            _logger.LogInformation($"User '{username}' logged out successfully.");
+            return Ok(new { Message = "Logged out successfully." });
         }
 
 
         // Refresh token
-        [HttpPost("Refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshModel refreshModel)
-        {
-            var principal = AuthServiceExtensions.GetPrincipalFromExpiredToken(refreshModel.AccessToken, _configuration);
-            var username = principal.Identity.Name;
+     [HttpPost("Refresh")]
+public async Task<IActionResult> Refresh([FromBody] RefreshModel refreshModel)
+{
+    // Extract username from the expired access token
+    var principal = AuthServiceExtensions.GetPrincipalFromExpiredToken(refreshModel.AccessToken, _configuration);
+    var username = principal.Identity.Name;
 
-            var user = await userManager.FindByNameAsync(username);
-            if (user == null || user.RefreshToken != refreshModel.RefreshToken || user.RefreshTokenExpiry <= DateTime.Now)
-            {
-                return BadRequest(new { Message = "Invalid client request" });
-            }
+    // Retrieve the user from the database
+    var user = await userManager.FindByNameAsync(username);
+    if (user == null)
+    {
+        return BadRequest(new { Message = "User not found." });
+    }
 
-            var newAccessToken = await authenticationManager.CreateTokenAsync();
-            var newRefreshToken = authenticationManager.GenerateRefreshToken();
+    // Validate the refresh token
+    if (user.RefreshToken != refreshModel.RefreshToken || user.RefreshTokenExpiry <= DateTime.Now)
+    {
+        return BadRequest(new { Message = "Invalid or expired refresh token." });
+    }
 
-            user.RefreshToken = (string)newRefreshToken;
-            user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+    // Generate new tokens
+    var newAccessToken = await authenticationManager.CreateTokenAsync();
+    var newRefreshToken = authenticationManager.GenerateRefreshToken();
 
-            await userManager.UpdateAsync(user);
+    // Update user's refresh token and expiry
+    user.RefreshToken =(string) newRefreshToken;
+    user.RefreshTokenExpiry = DateTime.Now.AddDays(1);
+    await userManager.UpdateAsync(user);
 
-            return new ObjectResult(new
-            {
-                Token = newAccessToken,
-                RefreshToken = newRefreshToken
-            });
-        }
-
+    // Return the new tokens
+    return Ok(new
+    {
+        AccessToken = newAccessToken,
+        RefreshToken = newRefreshToken
+    });
+}
 
         //revoke token
 
+        /// <summary>
+        /// Revokes the refresh token for the current user, effectively logging them out from all devices.
+        /// </summary>
+        /// <returns>An IActionResult indicating the outcome of the revoke operation.</returns>
         [HttpPost("Revoke")]
         public async Task<IActionResult> Revoke()
         {
-            _logger.LogInformation("Revoke called");
+            _logger.LogInformation("Revoke token process initiated.");
 
             var username = HttpContext.User.Identity?.Name;
-
-            if (username is null)
-                return Unauthorized();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                _logger.LogWarning("Revoke token attempt failed: Username is null or empty.");
+                return Unauthorized(new { Message = "Invalid request." });
+            }
 
             var user = await userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                _logger.LogWarning($"Revoke token attempt failed: User '{username}' not found.");
+                return Unauthorized(new { Message = "User not found." });
+            }
 
-            if (user is null)
-                return Unauthorized();
+            if (user.RefreshToken == null)
+            {
+                _logger.LogInformation($"Revoke token attempt aborted: No refresh token found for user '{username}'.");
+                return Ok(new { Message = "No refresh token to revoke." });
+            }
 
             user.RefreshToken = null;
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                _logger.LogError($"Failed to revoke refresh token for user '{username}'.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "An error occurred while revoking the token." });
+            }
 
-            await userManager.UpdateAsync(user);
-
-            _logger.LogInformation("Revoke succeeded");
-
-            return Ok();
+            _logger.LogInformation($"Refresh token for user '{username}' revoked successfully.");
+            return Ok(new { Message = "Token revoked successfully." });
         }
-
 
 
 

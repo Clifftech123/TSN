@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TertiarySchoolNavigator.Api.Contracts.School;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TertiarySchoolNavigator.Api.Interface;
 using TertiarySchoolNavigator.Api.Models.SchoolModels;
-using TertiarySchoolNavigator.Api.Models.SchoolModels.TertiarySchoolNavigator.Api.Models.SchoolModels;
 
 namespace TertiarySchoolNavigator.Api.Controllers
 {
@@ -17,138 +18,28 @@ namespace TertiarySchoolNavigator.Api.Controllers
             _schoolService = schoolService;
         }
 
-
-
-        // Create a new school
-        [HttpPost]
-        public async Task<ActionResult<SchoolResponse>> CreateSchool([FromBody] SchoolCreateRequest request)
-        {
-            if (request == null || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Region) || string.IsNullOrEmpty(request.District))
-            {
-                return BadRequest("School fields cannot be empty and must be provided");
-            }
-
-            var school = await _schoolService.CreateSchool(request);
-
-            if (school == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new school record");
-            }
-
-            var response = new SchoolResponse
-            {
-                School = school,
-                Message = "School created successfully"
-            };
-
-            return CreatedAtAction(nameof(GetSchoolById), new { id = school.Id }, response);
-        }
-
-
-
-
-
-        // Get a school by id
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Schoolmodole>> GetSchoolById(int id)
-        {
-            try
-            {
-                var school = await _schoolService.GetSchoolById(id);
-                if (school == null)
-                {
-                    return NotFound("School not found");
-                }
-
-                return Ok(school);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
-            }
-        }
-
-
-
-        //  Update an existing school
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSchool(int id, SchoolUpdateRequest request)
-        {
-            if (id != request.Id)
-            {
-                return BadRequest();
-            }
-
-            var school = await _schoolService.UpdateSchool(request);
-            if (school == null)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-
-
-
-
-        // Search for schools by name, region, district, or established year
-        [HttpPost("search")]
-        public async Task<ActionResult<List<Schoolmodole>>> SearchSchools(SchoolSearchRequest request)
-        {
-            try
-            {
-                var schools = await _schoolService.SearchSchools(request);
-                if (schools == null || !schools.Any())
-                {
-                    return NotFound("No schools found matching the search criteria");
-                }
-
-                var response = new SchoolSearchResponse
-                {
-                    Schools = schools,
-                    TotalCount = schools.Count
-                };
-
-                return Ok(response);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
-            }
-        }
-
-
-        //  Get all schools
+        // Get all schools
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Schoolmodole>>> GetAllSchools()
+        public async Task<ActionResult<IEnumerable<SchoolData>>> GetAllSchools()
         {
             var schools = await _schoolService.GetAllSchools();
-            if (schools == null)
+            if (schools == null || !schools.Any())
             {
-                throw new BadHttpRequestException("No School Found in  the database", StatusCodes.Status400BadRequest);
+                return NotFound("No schools found");
             }
             return Ok(schools);
         }
 
-
-
-        // Delete a school
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSchool(int id)
+        // Search for schools by name, location, or nickname
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<SchoolData>>> SearchSchools([FromQuery] string name, [FromQuery] string location, [FromQuery] string nickname)
         {
-            var result = await _schoolService.DeleteSchool(id);
-            if (!result)
+            var schools = await _schoolService.SearchSchools(name, location, nickname);
+            if (schools == null || !schools.Any())
             {
-                return NotFound();
+                return NotFound("No schools found matching the search criteria");
             }
-
-            return NoContent();
+            return Ok(schools);
         }
-
-
-
-
     }
 }

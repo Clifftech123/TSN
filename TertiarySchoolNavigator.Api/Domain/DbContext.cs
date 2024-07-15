@@ -20,7 +20,6 @@ namespace TertiarySchoolNavigator.Api.Domain
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Schoolmodole> Schools { get; set; }
 
     }
 }

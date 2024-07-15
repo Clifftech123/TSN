@@ -1,0 +1,229 @@
+﻿{
+  "institutions": [
+    {
+      "institution": "University of Ghana",
+      "nickname": "Legon",
+      "founded": 1948,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": 38000,
+      "location": ["Legon, Accra", "Korle Bu", "Atomic, Greater Accra", "including over ten workers' colleges all over the ten regions of Ghana"]
+    },
+    {
+      "institution": "Kwame Nkrumah University of Science and Technology",
+      "nickname": "KNUST",
+      "founded": 1952,
+      "undergrad": 21285,
+      "postgrad": 2306,
+      "total_2011": 23591,
+      "location": ["Kumasi, Ashanti"]
+    },
+    {
+      "institution": "University of Cape Coast",
+      "nickname": "Cape Vars",
+      "founded": 1961,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": 15835,
+      "location": ["Cape Coast, Central"]
+    },
+    {
+      "institution": "CK Tedam University for Technology and Applied Sciences",
+      "nickname": "CKT-UTAS",
+      "founded": 2020,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Navrongo, Upper East"]
+    },
+    {
+      "institution": "University of Education, Winneba",
+      "nickname": "UEW",
+      "founded": 1992,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": 16879,
+      "location": ["Winneba, Central"]
+    },
+    {
+      "institution": "Simon Diedong Dombo University for Business and Integrated Development Studies",
+      "nickname": "SDD-UBIDS",
+      "founded": 2020,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Wa, Upper West"]
+    },
+    {
+      "institution": "Akenten Appiah Menkah University of Skills Training and Entrepreneurial Development, Kumasi",
+      "nickname": "AAM-USTED",
+      "founded": 2020,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Kumasi and Mampong, Ashanti"]
+    },
+    {
+      "institution": "University for Development Studies",
+      "nickname": "UDS",
+      "founded": 1992,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Tamale, Northern"]
+    },
+    {
+      "institution": "University of Professional Studies",
+      "nickname": "UPS",
+      "founded": 1965,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": 10000,
+      "location": ["Accra, Greater Accra"]
+    },
+    {
+      "institution": "University of Mines and Technology",
+      "nickname": "UMAT",
+      "founded": 2001,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Tarkwa, Western"]
+    },
+    {
+      "institution": "University of Health and Allied Sciences",
+      "nickname": "UHAS",
+      "founded": 2011,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Ho, Volta"]
+    },
+    {
+      "institution": "University of Energy and Natural Resources",
+      "nickname": "UENR",
+      "founded": 2012,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Sunyani, Bono"]
+    },
+    {
+      "institution": "University of Environment and Sustainable Development",
+      "nickname": "UESD",
+      "founded": 2020,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Somanya, Eastern Region"]
+    },
+    {
+      "institution": "Ghana Institute of Management and Public Administration",
+      "nickname": "GIMPA",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Legon, Accra"]
+    },
+    {
+      "institution": "Ghana Communication Technology University",
+      "nickname": "GCTU",
+      "founded": 2005,
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Tesano, Accra"]
+    },
+    {
+      "institution": "Accra Technical University",
+      "nickname": "ATU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Accra, Greater Accra"]
+    },
+    {
+      "institution": "Bolgatanga Technical University",
+      "nickname": "BTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Bolgatanga, Upper East Region"]
+    },
+    {
+      "institution": "Cape Coast Technical University",
+      "nickname": "CCTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Cape Coast, Central"]
+    },
+    {
+      "institution": "Kumasi Technical University",
+      "nickname": "KsTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Kumasi, Ashanti"]
+    },
+    {
+      "institution": "Koforidua Technical University",
+      "nickname": "KTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Koforidua, Eastern"]
+    },
+    {
+      "institution": "Tamale Technical University",
+      "nickname": "TATU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Tamale, Northern"]
+    },
+    {
+      "institution": "Ho Technical University",
+      "nickname": "HTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Ho, Volta"]
+    },
+    {
+      "institution": "Takoradi Technical University",
+      "nickname": "TTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Takoradi, Western"]
+    },
+    {
+      "institution": "Sunyani Technical University",
+      "nickname": "STU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Sunyani, Bono"]
+    },
+    {
+      "institution": "Wa Technical University",
+      "nickname": "WTU",
+      "founded": "",
+      "undergrad": "",
+      "postgrad": "",
+      "total_2011": "",
+      "location": ["Wa, Upper West"]
+    }
+  ]
+}
